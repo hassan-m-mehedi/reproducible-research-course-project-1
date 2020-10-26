@@ -1,0 +1,171 @@
+Assignment
+===========
+
+```{r, echo=TRUE}
+data <- read.csv("C:\\Users\\mehedi\\Desktop\\Reproducible research\\reproducible-research-course-project-1\\activity.csv")
+```
+
+Total number of steps taken per day
+
+```{r, echo=TRUE}
+
+steps_per_day <- aggregate(steps~date, data, sum)
+
+hist(steps_per_day$steps, main = paste("Total Steps Per Day"), col = "blue", xlab = "number of steps")
+```
+
+Mean and median number of steps per day
+
+```{r, echo=TRUE}
+
+mean_steps <- mean(steps_per_day$steps)
+mean_steps
+
+median_steps <- median(steps_per_day$steps)
+median_steps
+
+```
+
+Average Daily Activity Pattern
+
+```{r, echo=TRUE}
+
+average_steps_interval <- aggregate(steps~interval,data, mean)
+
+plot(average_steps_interval$interval, average_steps_interval$steps, type = "l", xlab = "interval", ylab = "number of steps", main = "Average Steps Per Day with Interval")
+
+maximum_steps <- average_steps_interval[which.max(average_steps_interval$steps),1]
+
+maximum_steps
+
+```
+
+Imputing missing values
+
+```{r, echo=TRUE}
+
+total_missing_value <- sum(!complete.cases(data))
+
+total_missing_value
+```
+
+
+```{r, echo=TRUE}
+
+average_steps <- aggregate(steps~interval, data = data, FUN = mean)
+
+fill_missing_values <- numeric()
+
+for(i in 1:nrow(data)){
+  obs <- data[i, ]
+  if (is.na(obs$steps)){
+    steps <- subset(average_steps, interval == obs$interval)$steps
+  } else{
+    steps <- obs$steps
+  }
+  fill_missing_values <- c(fill_missing_values, steps)
+}
+```
+
+
+```{r, echo=TRUE}
+
+my_data <- data
+
+my_data$steps <- fill_missing_values
+```
+
+
+```{r, echo=TRUE}
+new_total_steps <- aggregate(steps~date, data = my_data, sum, na.rm = TRUE)
+
+hist(new_total_steps$steps, main = paste("Total Steps Per Day"), col = "black", xlab = "number of steps")
+
+hist(steps_per_day$steps, main = paste("Total Steps Per Day"), col = "red", xlab = "number of steps", add =T)
+
+legend("topright", c("missing values present", "no missing values present"), col = c("black", "red"), lwd= 10)
+```
+
+
+```{r, echo=TRUE}
+new_mean_total <- mean(new_total_steps$steps)
+
+new_mean_total
+
+new_median_total <- median(new_total_steps$steps)
+
+new_median_total
+```
+
+
+```{r, echo=TRUE}
+
+mean_difference <- mean_steps - new_mean_total
+
+mean_difference
+
+median_difference <- median_steps - new_median_total
+
+median_difference
+```
+
+
+Differences in activity pattern between weekdays and weekends
+
+```{r, echo=TRUE}
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+my_data$dow = as.factor(ifelse(is.element(weekdays(as.Date(my_data$date)), weekdays), "Weekday", "Weekend"))
+
+new_total_steps <- aggregate(steps~interval + dow, my_data, mean)
+
+library(lattice)
+
+xyplot(new_total_steps$steps ~ new_total_steps$interval|new_total_steps$dow, main = "Average Steps Per Day", xlab = "Interval", ylab = "Steps", layout = c(1,2), type = "l" )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
